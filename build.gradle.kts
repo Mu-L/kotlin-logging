@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "io.github.oshai"
-version = "7.0.15"
+version = "8.0.00-beta-01"
 
 repositories {
     google()
