@@ -45,6 +45,10 @@ kotlin {
     jvm {
         compilations {
             val main by getting
+            tasks.named<JavaCompile>("compileJvmMainJava") {
+                options.compilerArgs.add("--patch-module")
+                options.compilerArgs.add("io.github.oshai.kotlinlogging=${main.output.classesDirs.asPath}")
+            }
             // logback tests are testing only direct logback dependency (not slf4j/log4j)
             val logbackTest by compilations.creating {
                 defaultSourceSet {
