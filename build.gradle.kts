@@ -271,6 +271,10 @@ kotlin {
             getByName("${it.targetName}Test") {
                 dependsOn(darwinTest)
             }
+            val main by it.compilations.getting
+            val oslog by main.cinterops.creating {
+                defFile(project.file("src/darwinMain/cinterop/oslog.def"))
+            }
         }
     }
 }
@@ -407,3 +411,11 @@ tasks.withType<AbstractPublishToMaven>().configureEach {
     mustRunAfter(signingTasks)
 }
 //endregion
+
+// Fix implicit dependency issue for native MetadataElements tasks
+// "Declare an explicit dependency on ':commonizeCInterop' from ':*MetadataElements' using Task#dependsOn"
+tasks.matching {
+    it.name.matches("^(linux|mingw|androidNative|macos|ios|watchos|tvos).*MetadataElements$".toRegex())
+}.configureEach {
+    dependsOn("commonizeCInterop")
+}
