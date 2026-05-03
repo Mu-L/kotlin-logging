@@ -3,7 +3,8 @@ package io.github.oshai.kotlinlogging.internal
 import com.oracle.svm.core.annotate.Substitute
 import com.oracle.svm.core.annotate.TargetClass
 import com.oracle.svm.core.annotate.TargetElement
-import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.DirectLoggerFactory
+import io.github.oshai.kotlinlogging.KLoggerFactory
 import io.github.oshai.kotlinlogging.jul.internal.JulLoggerFactory
 import io.github.oshai.kotlinlogging.slf4j.internal.Slf4jLoggerFactory
 import java.util.function.BooleanSupplier
@@ -16,21 +17,23 @@ import java.util.function.BooleanSupplier
  * to convention.
  */
 @Suppress("unused")
-internal class Target_io_github_oshai_kotlinlogging_internal_KLoggerFactory {
+internal class Target_io_github_oshai_kotlinlogging_KotlinLoggingConfiguration {
   @TargetClass(
-    className = "io.github.oshai.kotlinlogging.internal.KLoggerFactory",
+    className = "io.github.oshai.kotlinlogging.KotlinLoggingConfiguration",
     onlyWith = [LogbackNotOnClasspath::class],
   )
   companion object {
     @Substitute
-    @TargetElement(name = "logger\$kotlin_logging")
-    fun logger(name: String): KLogger {
+    @TargetElement(name = "detectLogger")
+    fun detectLogger(): KLoggerFactory {
       if (System.getProperty("kotlin-logging-to-jul") != null) {
-        return JulLoggerFactory.wrapJLogger(JulLoggerFactory.jLogger(name))
+        return JulLoggerFactory
+      } else if (System.getProperty("kotlin-logging-to-direct") == "true") {
+        return DirectLoggerFactory
       }
       // Intentionally leave out the logback branch as logback is not on the classpath.
       // default to SLF4J
-      return Slf4jLoggerFactory.wrapJLogger(Slf4jLoggerFactory.jLogger(name))
+      return Slf4jLoggerFactory
     }
   }
 }
