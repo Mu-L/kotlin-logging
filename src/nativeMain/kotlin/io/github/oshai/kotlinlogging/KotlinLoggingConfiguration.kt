@@ -1,6 +1,14 @@
 package io.github.oshai.kotlinlogging
 
 import kotlin.concurrent.AtomicReference
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.toKString
+import platform.posix.getenv
+
+@OptIn(ExperimentalForeignApi::class)
+private fun getEnv(name: String): String? {
+  return getenv(name)?.toKString()
+}
 
 public actual object KotlinLoggingConfiguration {
   public actual val direct: DirectLoggingConfiguration =
@@ -31,7 +39,8 @@ public actual object KotlinLoggingConfiguration {
         }
     }
 
-  private val _logStartupMessage = AtomicReference(true)
+  private val _logStartupMessage =
+    AtomicReference(getEnv("KOTLIN_LOGGING_STARTUP_MESSAGE")?.toBoolean() ?: true)
   public actual var logStartupMessage: Boolean
     get() = _logStartupMessage.value
     set(value) {
